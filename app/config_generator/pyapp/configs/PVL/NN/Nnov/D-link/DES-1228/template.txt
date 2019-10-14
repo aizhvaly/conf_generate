@@ -1,0 +1,357 @@
+
+
+# BASIC
+
+config serial_port baud_rate 9600 auto_logout 10_minutes
+# ACCOUNT LIST
+
+create account admin admin
+qjd9ud62
+qjd9ud62
+
+# ACCOUNT END
+
+# PASSWORD ENCRYPTION
+enable password encryption
+config terminal_line default
+enable clipaging
+disable command logging
+
+# STORM
+
+config traffic trap none
+config traffic control  1-24 broadcast enable multicast enable unicast disable action drop threshold 64 countdown 5 time_interval 5
+config traffic control  25-28 broadcast disable multicast disable unicast disable action drop threshold 64 countdown 0 time_interval 5
+
+# LOOP_DETECT
+
+enable loopdetect
+config loopdetect recover_timer 180
+config loopdetect interval 10
+config loopdetect port 1-23 state enabled
+config loopdetect port 24-28 state disabled
+
+# QOS
+
+config scheduling_mechanism strict
+config scheduling 0 weight 1
+config scheduling 1 weight 2
+config scheduling 2 weight 4
+config scheduling 3 weight 8
+config 802.1p user_priority 0 1
+config 802.1p user_priority 1 0
+config 802.1p user_priority 2 0
+config 802.1p user_priority 3 1
+config 802.1p user_priority 4 2
+config 802.1p user_priority 5 2
+config 802.1p user_priority 6 3
+config 802.1p user_priority 7 3
+config cos tos value 0 class 0
+config cos tos value 1 class 0
+config cos tos value 2 class 0
+config cos tos value 3 class 0
+config cos tos value 4 class 0
+config cos tos value 5 class 0
+config cos tos value 6 class 0
+config cos tos value 7 class 0
+config dscp_mapping dscp_value 0 class 0
+config dscp_mapping dscp_value 1 class 0
+config dscp_mapping dscp_value 2 class 0
+config dscp_mapping dscp_value 3 class 0
+config dscp_mapping dscp_value 4 class 0
+config dscp_mapping dscp_value 5 class 0
+config dscp_mapping dscp_value 6 class 0
+config dscp_mapping dscp_value 7 class 0
+config dscp_mapping dscp_value 8 class 0
+config dscp_mapping dscp_value 9 class 0
+config dscp_mapping dscp_value 10 class 0
+config dscp_mapping dscp_value 11 class 0
+config dscp_mapping dscp_value 12 class 0
+config dscp_mapping dscp_value 13 class 0
+config dscp_mapping dscp_value 14 class 0
+config dscp_mapping dscp_value 15 class 0
+config dscp_mapping dscp_value 16 class 0
+config dscp_mapping dscp_value 17 class 0
+config dscp_mapping dscp_value 18 class 0
+config dscp_mapping dscp_value 19 class 0
+config dscp_mapping dscp_value 20 class 0
+config dscp_mapping dscp_value 21 class 0
+config dscp_mapping dscp_value 22 class 0
+config dscp_mapping dscp_value 23 class 0
+config dscp_mapping dscp_value 24 class 0
+config dscp_mapping dscp_value 25 class 0
+config dscp_mapping dscp_value 26 class 0
+config dscp_mapping dscp_value 27 class 0
+config dscp_mapping dscp_value 28 class 0
+config dscp_mapping dscp_value 29 class 0
+config dscp_mapping dscp_value 30 class 0
+config dscp_mapping dscp_value 31 class 0
+config dscp_mapping dscp_value 32 class 0
+config dscp_mapping dscp_value 33 class 0
+config dscp_mapping dscp_value 34 class 0
+config dscp_mapping dscp_value 35 class 0
+config dscp_mapping dscp_value 36 class 0
+config dscp_mapping dscp_value 37 class 0
+config dscp_mapping dscp_value 38 class 0
+config dscp_mapping dscp_value 39 class 0
+config dscp_mapping dscp_value 40 class 0
+config dscp_mapping dscp_value 41 class 0
+config dscp_mapping dscp_value 42 class 0
+config dscp_mapping dscp_value 43 class 0
+config dscp_mapping dscp_value 44 class 0
+config dscp_mapping dscp_value 45 class 0
+config dscp_mapping dscp_value 46 class 0
+config dscp_mapping dscp_value 47 class 0
+config dscp_mapping dscp_value 48 class 0
+config dscp_mapping dscp_value 49 class 0
+config dscp_mapping dscp_value 50 class 0
+config dscp_mapping dscp_value 51 class 0
+config dscp_mapping dscp_value 52 class 0
+config dscp_mapping dscp_value 53 class 0
+config dscp_mapping dscp_value 54 class 0
+config dscp_mapping dscp_value 55 class 0
+config dscp_mapping dscp_value 56 class 0
+config dscp_mapping dscp_value 57 class 0
+config dscp_mapping dscp_value 58 class 0
+config dscp_mapping dscp_value 59 class 0
+config dscp_mapping dscp_value 60 class 0
+config dscp_mapping dscp_value 61 class 0
+config dscp_mapping dscp_value 62 class 0
+config dscp_mapping dscp_value 63 class 0
+config 802.1p default_priority 1-28 0
+config cos mapping port 1-28  ethernet 802.1p
+
+
+# BANDWIDTH
+
+config bandwidth_control 1-28 rx_rate no_limit tx_rate no_limit
+
+
+# TRAF-SEGMENTATION
+
+config traffic_segmentation 1-24 forward_list 25-28
+config traffic_segmentation 24-28 forward_list 1-28
+
+# PORT
+
+enable jumbo_frame
+config ports 1-28  speed auto flow_control disable state enable  clear_description
+config ports 1-28  learning enable
+config ports 1-28  mdix auto
+config ports 25-26 medium_type fiber speed auto flow_control disable state enable  clear_description
+config ports 25-26 medium_type fiber learning enable
+config ports 25-26  speed auto flow_control disable state enable  clear_description
+
+
+#MANAGEMENT
+
+disable snmp traps
+disable snmp authenticate traps
+enable snmp linkchange_traps
+config snmp linkchange_traps ports all enable
+config snmp coldstart_traps enable
+config snmp warmstart_traps enable
+config snmp system_name {{hostname}}
+disable rmon
+
+# SNMPv3
+
+delete snmp community public
+delete snmp community private
+delete snmp user initial
+delete snmp group initial
+delete snmp view restricted all
+delete snmp view CommunityView all
+delete snmp group public
+delete snmp group private
+delete snmp group ReadGroup
+delete snmp group WriteGroup
+config snmp engineID 4445532d313231302d3238ec22807c705e
+create snmp view CommunityView 1 view_type included
+create snmp view CommunityView 1.3.6.1.6.3 view_type excluded
+create snmp view CommunityView 1.3.6.1.6.3.1 view_type included
+create snmp group 69gf v1 read_view CommunityView write_view CommunityView notify_view CommunityView
+create snmp group 69gf v2c read_view CommunityView write_view CommunityView notify_view CommunityView
+create snmp group ud62 v1 read_view CommunityView notify_view CommunityView
+create snmp group ud62 v2c read_view CommunityView notify_view CommunityView
+create snmp group apgeud62 v1 read_view CommunityView write_view CommunityView notify_view CommunityView
+create snmp group apgeud62 v2c read_view CommunityView write_view CommunityView notify_view CommunityView
+create snmp group nfrnjrfr v1 read_view CommunityView notify_view CommunityView
+create snmp group nfrnjrfr v2c read_view CommunityView notify_view CommunityView
+create snmp group rfrnjnfr v1 read_view CommunityView notify_view CommunityView
+create snmp group rfrnjnfr v2c read_view CommunityView notify_view CommunityView
+create snmp community 69gf view CommunityView read_write
+create snmp community apgeud62 view CommunityView read_write
+create snmp community rfrnjnfr view CommunityView read_only
+create snmp community ud62 view CommunityView read_only
+create snmp host 195.122.226.24 v2c  ud62
+
+# VLAN
+
+disable asymmetric_vlan
+config vlan default delete 1-28
+create vlan mgmt tag {{mgmt_vlan | join(",")}}
+config vlan mgmt add tagged 25-28 advertisement disable
+config vlan mgmt add untagged 24 advertisement disable
+{% for vlan in user_vlan %}
+create vlan user tag {{vlan}}
+config vlan user add tagged 25-28 advertisement disable
+config vlan user add untagged 1-23 advertisement disable
+{% endfor %}
+{% for vlan in other_user_vlans %}
+create vlan {{vlan}} tag {{vlan}}
+config vlan {{vlan}} add tagged 25-28 advertisement disable
+{% endfor %}
+config ipif System vlan mgmt
+enable pvid auto_assign
+disable gvrp
+config gvrp 1-23 state disable ingress_checking enable acceptable_frame admit_all pvid {{(user_vlan | join(","))}}
+config gvrp 24-28 state disable ingress_checking enable acceptable_frame admit_all pvid 1
+
+
+# PORT_LOCK
+
+enable port_security trap_log
+config port_security ports 1-23 admin_state enable max_learning_addr 5 lock_address_mode DeleteOnTimeout
+config port_security ports 24-28 admin_state disable max_learning_addr 0 lock_address_mode DeleteOnTimeout
+
+
+# MAC_ADDRESS_TABLE_NOTIFICATION
+
+config mac_notification interval 300 historysize 128
+enable mac_notification
+config mac_notification ports 1-23 enable
+config mac_notification ports 24-28 disable
+
+# STP
+
+config stp version rstp
+config stp maxage 20 maxhops 20 forwarddelay 15 txholdcount 6 fbpdu enable hellotime 2 
+config stp priority 32768 instance_id 0
+config stp mst_config_id name MST_ID_0 revision_level 0
+config stp trap new_root enable topo_change enable
+config stp ports 1-24 externalCost auto edge false p2p auto state disable 
+config stp mst_ports 1-28 instance_id 0 internalCost auto priority 128
+config stp ports 1-24 fbpdu disable
+config stp ports 1-28 restricted_role false
+config stp ports 1-28 restricted_tcn false
+config stp ports 25-28 externalCost auto edge false p2p auto state enable 
+config stp ports 25-28 fbpdu enable
+disable stp
+
+
+# BPDU_PROTECTION
+
+config bpdu_protection ports 1-24 mode shutdown
+
+# SAFEGUARD_ENGINE
+
+config safeguard_engine state enable utilization rising 70 falling 40 trap_log enable mode fuzzy
+
+# BANNER_PROMP
+
+config command_prompt {{hostname}}
+config greeting_message default
+
+# FDB
+
+config fdb aging_time 300
+config multicast port_filtering_mode all filter_unregistered_groups
+enable flood_fdb
+config flood_fdb log enable trap disable
+
+
+# SNTP
+
+enable sntp
+config time_zone operator + hour 3 min 0
+config sntp primary 172.22.2.1 secondary 10.35.59.142 poll-interval 86400
+config dst disable
+
+# DHCP_SERVER_SCREENING
+
+config filter dhcp_server ports 1-23 state enable
+config filter dhcp_server ports 24-28 state disable
+config filter dhcp_server trap enable
+config filter dhcp_server log enable
+config filter dhcp_server illegal_server_log_suppress_duration 5min
+
+# IP
+
+config ipif System vlan mgmt ipaddress {{net_details['net_details_ip_with_netmask']}} state enable
+config ipif System dhcp_option12 state disable
+enable telnet 23
+disable web
+disable autoconfig
+
+# LLDP
+
+enable lldp
+config lldp message_tx_interval 30
+config lldp tx_delay 2
+config lldp message_tx_hold_multiplier 4
+config lldp reinit_delay 2
+config lldp notification_interval 5
+config lldp forward_message enable
+config lldp ports 1-24 notification disable
+config lldp ports 1-24 admin_status disable
+config lldp ports 25-28 notification enable
+config lldp ports 25-28 admin_status tx_and_rx
+config lldp ports 25-28 basic_tlvs port_description system_name system_description system_capabilities enable
+config lldp ports 25-28 mgt_addr ipv4 {{net_details['net_details_ip']}} enable
+
+# ARP
+
+config arp_aging time 20
+config gratuitous_arp send ipif_status_up enable
+config gratuitous_arp send dup_ip_detected enable
+config gratuitous_arp learning enable
+
+# AAA
+
+create authen server_host 10.35.59.140 protocol tacacs+ port 49 key "NNOV_TACACS" timeout 5 retransmit 2
+config authen server_group tacacs+ delete server_host 10.35.59.140 protocol tacacs+
+config authen server_group tacacs+ add server_host 10.35.59.140 protocol tacacs+
+config authen_login default method local
+create authen_login method_list_name RADIUS
+config authen_login method_list_name RADIUS method radius local
+create authen_login method_list_name tac_plus
+config authen_login method_list_name tac_plus method tacacs+ local
+config authen_enable default method  local_enable
+create authen_enable method_list_name tac_plus_ena
+config authen_enable method_list_name tac_plus_ena method tacacs+ local_enable
+config authen application console login default
+config authen application console enable default
+config authen application telnet login method_list_name tac_plus
+config authen application telnet enable method_list_name tac_plus_ena
+config authen application ssh login default
+config authen application ssh enable default
+config authen application http login default
+config authen application http enable default
+config authen parameter response_timeout 30
+config authen parameter attempt 3
+enable authen_policy
+config admin local_enable
+
+qjd9ud62
+qjd9ud62
+
+# DHCP_RELAY
+
+disable dhcp_relay
+config dhcp_relay hops 4 time 0
+config dhcp_relay option_82 state enable
+config dhcp_relay option_82 check disable
+config dhcp_relay option_82 policy replace
+config dhcp_relay option_82 remote_id default
+
+# DHCP_LOCAL_RELAY
+
+enable dhcp_local_relay
+config dhcp_local_relay option_82 remote_id default
+config dhcp_local_relay vlan vlanid {{user_vlan | join(",")}} state enable
+
+
+# ROUTE
+
+create iproute default {{net_details['net_details_def_gateway']}} 1

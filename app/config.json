@@ -1,0 +1,6 @@
+{
+  "api_url":"http://10.35.131.136:10199/api/myapp/",
+  "user":"api_user",
+  "passwd":"api_user",
+  "mode":"off"
+}

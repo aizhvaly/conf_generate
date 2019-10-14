@@ -1,0 +1,732 @@
+#
+!Software Version V100R006C05
+ sysname {{hostname}}
+#
+ info-center loghost source Vlanif{{mgmt_vlan | join(",")}}
+ info-center loghost 195.122.226.2
+#
+ voice-vlan mac-address 0001-e300-0000 mask ffff-ff00-0000 description Siemens phone
+ voice-vlan mac-address 0003-6b00-0000 mask ffff-ff00-0000 description Cisco phone
+ voice-vlan mac-address 0004-0d00-0000 mask ffff-ff00-0000 description Avaya phone
+ voice-vlan mac-address 0060-b900-0000 mask ffff-ff00-0000 description Philips/NEC phone
+ voice-vlan mac-address 00d0-1e00-0000 mask ffff-ff00-0000 description Pingtel phone
+ voice-vlan mac-address 00e0-7500-0000 mask ffff-ff00-0000 description Polycom phone
+ voice-vlan mac-address 00e0-bb00-0000 mask ffff-ff00-0000 description 3com phone
+#
+ vlan batch {{mgmt_vlan | join(" ")}} {{user_vlan | join(" ")}} {{other_user_vlans | join(" ")}}
+#
+ stp mode rstp
+ stp bpdu-protection
+ stp enable
+#
+lldp enable
+#
+dhcp enable
+dhcp snooping enable
+dhcp server detect
+dhcp option82 format extend
+dhcp option82 vendor-specific format vendor-sub-option 9 ip-address {{net_details['net_details_ip']}}
+#
+ undo http server enable
+ undo http secure-server enable
+#
+ drop illegal-mac alarm
+#
+hwtacacs-server template dofs-tacacs
+ hwtacacs-server authentication 10.35.59.139
+ hwtacacs-server authorization 10.35.59.139
+ hwtacacs-server accounting 10.35.59.139
+ hwtacacs-server shared-key cipher %@%@N}:fAcuoHD-{AwD,yDJ0@,Fi%@%@
+ undo hwtacacs-server user-name domain-included
+#
+acl number 2033
+ description EMC-SMARTS
+ rule 5 permit source 195.122.226.0 0.0.0.63
+ rule 10 permit source 172.22.2.0 0.0.0.255
+ rule 20 permit source 10.35.59.128 0.0.0.63
+#
+vlan {{mgmt_vlan | join(" ")}}
+ description mgmt
+vlan {{user_vlan | join(" ")}}
+ description Users-Vlan-{{user_vlan | join(" ")}}
+ dhcp snooping enable
+ dhcp option82 rebuild enable interface Ethernet 0/0/1 to 0/0/23
+#
+aaa
+ authentication-scheme default
+  authentication-mode radius local
+ authentication-scheme tacacs
+  authentication-mode hwtacacs radius local
+ authorization-scheme default
+  authorization-mode  if-authenticated local
+ authorization-scheme tacacs
+  authorization-mode  hwtacacs local
+  authorization-cmd 4 hwtacacs local
+  authorization-cmd 8 hwtacacs local
+ accounting-scheme default
+ accounting-scheme tacacs
+  accounting-mode hwtacacs
+  accounting start-fail online
+ recording-scheme tacacs
+  recording-mode hwtacacs dofs-tacacs
+ cmd recording-scheme tacacs
+ system recording-scheme tacacs
+ domain default
+  authentication-scheme tacacs
+  accounting-scheme tacacs
+  authorization-scheme tacacs
+  radius-server  default
+  hwtacacs-server dofs-tacacs
+ domain default_admin
+  authentication-scheme tacacs
+  accounting-scheme tacacs
+  authorization-scheme tacacs
+  radius-server  default
+  hwtacacs-server dofs-tacacs
+ local-user admin password cipher %@%@lhms58p;.$)V(~X(l^mUQ5<e%@%@
+ local-user admin privilege level 3
+ local-user admin ftp-directory flash:
+ local-user admin service-type telnet
+#
+ ntp-service unicast-server 172.22.2.1
+ ntp-service unicast-server 10.35.59.148
+ ntp-service unicast-server 10.35.59.142
+#
+interface Vlanif1
+#
+interface Vlanif{{mgmt_vlan | join(" ")}}
+ ip address {{net_details['net_details_ip']}} {{net_details['net_details_netmask']}}
+#
+interface Ethernet0/0/1
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/2
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/3
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/4
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/5
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/6
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/7
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/8
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/9
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/10
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/11
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/12
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/13
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/14
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/15
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/16
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/17
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/18
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/19
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/20
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/21
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/22
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/23
+ port hybrid pvid vlan {{user_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{user_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ dhcp snooping enable
+ dhcp snooping check dhcp-request enable
+ dhcp snooping check dhcp-chaddr enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ ip source check user-bind enable
+ ip source check user-bind alarm enable
+ ip source check user-bind alarm threshold 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface Ethernet0/0/24
+ port hybrid pvid vlan {{mgmt_vlan | join(" ")}}
+ undo port hybrid vlan 1
+ port hybrid untagged vlan {{mgmt_vlan | join(" ")}}
+ loopback-detect enable
+ stp disable
+ undo lldp enable
+ port-security enable
+ port-security protect-action protect
+ port-security max-mac-num 5
+ port-security aging-time 10
+ unicast-suppression 5
+ multicast-suppression 5
+ broadcast-suppression 5
+#
+interface GigabitEthernet0/0/1
+ description
+ port link-type trunk
+ undo port trunk allow-pass vlan 1
+ port trunk allow-pass vlan {{mgmt_vlan | join(" ")}} {{user_vlan | join(" ")}} {{other_user_vlans | join(" ")}}
+ dhcp snooping trusted
+ port media type fiber
+     flow-control negotiation
+ combo-port auto
+#
+interface GigabitEthernet0/0/2
+ description
+ port link-type trunk
+ undo port trunk allow-pass vlan 1
+ port trunk allow-pass {{mgmt_vlan | join(" ")}} {{user_vlan | join(" ")}} {{other_user_vlans | join(" ")}}
+ dhcp snooping trusted
+ port media type copper
+     flow-control negotiation
+ combo-port auto
+#
+interface NULL0
+#
+ ip route-static 0.0.0.0 0.0.0.0 {{net_details['net_details_def_gateway']}}
+#
+ snmp-agent
+ snmp-agent local-engineid 000007DB7F00000100003EA3
+ snmp-agent community read cipher %@%@kKpiDxI5`U^F"0"wNZCIQ5[Yg,lB:bH44Ge1Sc~B[.g45[\Q*xry-.m<Y6kmn(*l$RQO[eQ5%@%@ mib-view ALL
+ snmp-agent community read cipher %@%@}DF~4X(%H036T!BO)x7+K&fP{x9#>Wd"V4|Twh7,<ZDC&fSKuz_aH-hutN/[ymIp/RxFf\K&%@%@ mib-view ALL acl 2033
+ snmp-agent community write cipher %@%@K$\13|F4YIp'S8=6hSjTQ5[BugC'%Z1(hVQA'y6$LE605[EQs9m>ABmYUGpC"N%yHt`4[NQ5%@%@
+ snmp-agent community write cipher %@%@@@zS-b%BU3;9Yq2+#N$CQ5ZzNJanQ5;|q0wM}0LUCyv95Z}QM8xa;wcvB:hWy4X^F96'Z)Q5%@%@ mib-view ALL
+ snmp-agent community complexity-check disable
+ snmp-agent sys-info contact noc@sandy.ru
+ snmp-agent sys-info location NN-{{hostname}}
+ snmp-agent sys-info version v2c v3
+ snmp-agent target-host trap address udp-domain 195.122.226.24 params securityname cipher %@%@A"6[!pG2k+DX7{+HW@8!Q5\k%@%@ v2c
+ snmp-agent mib-view included ALL iso
+ snmp-agent notification-log enable
+ snmp-agent trap enable feature-name EFM trap-name threshold
+ snmp-agent trap enable feature-name EFM trap-name nonthreshold
+ snmp-agent trap enable feature-name EFM trap-name testfailed
+ snmp-agent trap enable feature-name EFM trap-name testcompleted
+ snmp-agent trap enable feature-name EFM trap-name dyinggasp
+ snmp-agent trap enable feature-name EFM trap-name nonthredholdrecovery
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpiPortStateForwarding
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpiPortStateDiscarding
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpiBridgeLostRootPrimary
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpiPortBpduGuarded
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpiPortRootGuarded
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpiPortLoopGuarded
+ snmp-agent trap enable feature-name MSTP trap-name newRoot
+ snmp-agent trap enable feature-name MSTP trap-name topologyChange
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpiEdgePortChanged
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpiTcGuarded
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpProNewPortStateForwarding
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpProNewPortStateDiscarding
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpProNewBridgeLostRootPrimary
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpProNewPortBpduGuarded
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpProNewPortRootGuarded
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpProNewPortLoopGuarded
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpProNewEdgePortChanged
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpProTcGuarded
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpProRootChanged
+ snmp-agent trap enable feature-name MSTP trap-name hwMstpProLoopbackDetected
+ snmp-agent trap enable feature-name IFNET trap-name linkDown
+ snmp-agent trap enable feature-name IFNET trap-name linkUp
+ snmp-agent trap enable feature-name SSH trap-name hwSSHSftpUserNumExceedMax
+ snmp-agent trap enable feature-name CONFIGURATION trap-name hwCfgManEventlog
+ snmp-agent trap enable feature-name CONFIGURATION trap-name hwCfgOperateCompletion
+ snmp-agent trap enable feature-name CONFIGURATION trap-name hwCfgInconsistent
+ snmp-agent trap enable feature-name CONFIGURATION trap-name hwCfgConsistent
+ snmp-agent trap enable feature-name CONFIGURATION trap-name hwCfgB2STransferFail
+ snmp-agent trap enable feature-name CONFIGURATION trap-name hwCfgB2SOperate
+ snmp-agent trap enable feature-name SYSTEM trap-name hwSysReloadNotification
+ snmp-agent trap enable feature-name SYSTEM trap-name hwSysClockChangedNotification
+ snmp-agent trap enable feature-name SYSTEM trap-name hwPatchErrorTrap
+ snmp-agent trap enable feature-name SYSTEM trap-name hwPatchActiveOverTimeTrap
+ snmp-agent trap enable feature-name SYSTEM trap-name hwPatchMalfunctionComebackTrap
+ snmp-agent trap enable feature-name SYSTEM trap-name hwSysSlaveSwitchFailNotification
+ snmp-agent trap enable feature-name SYSTEM trap-name hwSysSlaveSwitchSuccessNotification
+ snmp-agent trap enable feature-name SNMP trap-name authenticationFailure
+ snmp-agent trap enable feature-name VFS trap-name hwFlhOperNotification
+ snmp-agent trap enable feature-name VFS trap-name hwSysMasterHDError
+ snmp-agent trap enable feature-name VFS trap-name hwSysSlaveHDError
+ snmp-agent trap enable feature-name VFS trap-name hwFlhSyncSuccessNotification
+ snmp-agent trap enable feature-name VFS trap-name hwFlhSyncFailNotification
+ snmp-agent trap enable feature-name EOAM-1AG trap-name ccfaultalarm
+#
+ command-privilege level 1 view shell system-view
+ command-privilege level 1 view system interface ethernet 0/0/1
+ command-privilege level 1 view ethernet-l2 virtual-cable-test
+ command-privilege level 1 view ethernet-l2 undo shutdown
+ command-privilege level 1 view shell reset counters interface ethernet 0/0/1
+ command-privilege level 1 view shell save
+ command-privilege level 1 view shell display logbuffer
+#
+user-interface maximum-vty 4
+user-interface con 0
+ user privilege level 15
+user-interface vty 0 3
+ authentication-mode aaa
+ user privilege level 3
+ idle-timeout 0 0
+ screen-length 25
+#
+port-group lldp
+ group-member GigabitEthernet0/0/1
+ group-member GigabitEthernet0/0/2
+#
+port-group user
+ group-member Ethernet0/0/1
+ group-member Ethernet0/0/2
+ group-member Ethernet0/0/3
+ group-member Ethernet0/0/4
+ group-member Ethernet0/0/5
+ group-member Ethernet0/0/6
+ group-member Ethernet0/0/7
+ group-member Ethernet0/0/8
+ group-member Ethernet0/0/9
+ group-member Ethernet0/0/10
+ group-member Ethernet0/0/11
+ group-member Ethernet0/0/12
+ group-member Ethernet0/0/13
+ group-member Ethernet0/0/14
+ group-member Ethernet0/0/15
+ group-member Ethernet0/0/16
+ group-member Ethernet0/0/17
+ group-member Ethernet0/0/18
+ group-member Ethernet0/0/19
+ group-member Ethernet0/0/20
+ group-member Ethernet0/0/21
+ group-member Ethernet0/0/22
+ group-member Ethernet0/0/23
+ group-member Ethernet0/0/24
+#
+return

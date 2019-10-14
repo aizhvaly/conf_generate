@@ -1,0 +1,331 @@
+
+
+# ACCOUNT LIST
+create account admin admin
+qjd9ud62
+qjd9ud62
+
+# ACCOUNT END
+
+# DEBUG
+
+debug config state enable
+debug config error_reboot enable
+
+# STORM
+
+config traffic control 1-48 broadcast enable multicast enable unicast disable action drop threshold 64 countdown 0 time_interval 5
+config traffic control 49-52 broadcast disable multicast disable unicast disable action drop threshold 64 countdown 0 time_interval 5
+config traffic control auto_recover_time 0
+config traffic trap none
+config traffic control log state enable
+
+# LOOP_DETECT
+
+enable loopdetect
+config loopdetect recover_timer 180 interval 10 mode port-based
+config loopdetect log state enable
+config loopdetect ports 1-48 state enable
+config loopdetect ports 49-52 state disable
+config loopdetect trap none
+
+
+# TRAF-SEGMENTATION
+
+config traffic_segmentation 1-48 forward_list 49-52
+config traffic_segmentation 49-52 forward_list 1-52
+
+
+# PORT
+
+enable jumbo_frame
+config autocable_diag ports 1-52 state disable
+config ports 1-52 linkchange_logs enable
+config ports 1-48 speed auto  capability_advertised  10_half 10_full 100_half 100_full flow_control disable learning enable state enable mdix auto
+config ports 49-50 medium_type copper speed auto  capability_advertised  10_half 10_full 100_half 100_full 1000_full flow_control disable learning enable state enable mdix auto
+config ports 49-50 medium_type fiber speed auto  capability_advertised  1000_full flow_control disable learning enable state enable
+config ports 51-52 speed auto  capability_advertised  1000_full flow_control disable learning enable state enable
+
+# DDM
+
+config ddm trap disable
+config ddm log enable
+config ddm power_unit mw
+config ddm ports 49-52 state enable shutdown none
+config ddm ports 49-52 temperature_threshold high_alarm 0.000 low_alarm 0.000 high_warning 0.000 low_warning -20.000
+config ddm ports 49-52 voltage_threshold high_alarm 0.00 low_alarm 0.00 high_warning 0.00 low_warning 2.90
+config ddm ports 49-52 bias_current_threshold high_alarm 0.0 low_alarm 0.0 high_warning 0.0 low_warning 1.0
+config ddm ports 49-52 tx_power_threshold high_alarm 0.0000 low_alarm 0.0000 high_warning 0.0000 low_warning 0.2000
+config ddm ports 49-52 rx_power_threshold high_alarm 0.0000 low_alarm 0.0000 high_warning 0.0000 low_warning 0.0126
+
+# MANAGEMENT
+
+enable snmp traps
+enable snmp authenticate_traps
+enable snmp linkchange_traps
+enable snmp
+config snmp system_name {{hostname}}
+config snmp system_location NN-{{hostname}}
+config snmp linkchange_traps ports 1-52 enable
+
+
+# TRAP
+
+config snmp coldstart_traps enable
+config snmp warmstart_traps enable
+config rmon trap rising_alarm enable
+config rmon trap falling_alarm enable
+
+
+# VLAN
+
+enable pvid auto_assign
+config vlan default delete 1-52
+create vlan mgmt tag {{mgmt_vlan | join(",")}}
+config vlan mgmt add tagged 49-52 advertisement disable
+config vlan mgmt add untagged 48 advertisement disable
+{% for vlan in user_vlan %}
+create vlan user tag {{vlan}}
+config vlan user add tagged 49-52 advertisement disable
+config vlan user add untagged 1-47 advertisement disable
+{% endfor %}
+{% for vlan in other_user_vlans %}
+create vlan {{vlan}} tag {{vlan}}
+config vlan {{vlan}} add tagged 49-52 advertisement disable
+{% endfor %}
+disable qinq
+disable gvrp
+config gvrp nni_bpdu_addr dot1d
+disable vlan_trunk
+config port_vlan 1-48 gvrp_state disable ingress_checking enable acceptable_frame admit_all pvid {{user_vlan | join(",")}}
+config port_vlan 1-52 gvrp_state disable ingress_checking enable acceptable_frame admit_all pvid 1
+
+# PORT_SECURITY
+
+config port_security system max_learning_addr no_limit
+enable port_security trap_log
+config port_security ports 1-48 admin_state enable max_learning_addr 5 lock_address_mode deleteontimeout
+config port_security ports 49-52 admin_state disable max_learning_addr 1 lock_address_mode deleteontimeout
+
+
+# FDB
+
+config fdb aging_time 300
+config block tx ports 1-52 unicast disable
+config fdb vlan_learning vlanid {{user_vlan | join(",")}},{{other_user_vlans | join(",")}} state enable
+
+# ADDRBIND
+
+enable address_binding roaming
+config address_binding dhcp snooping recovery_timer 300
+config address_binding dhcp snooping ports 1-52 limit no_limit
+disable address_binding dhcp_snoop ipv6
+disable address_binding dhcp_pd_snoop
+disable address_binding nd_snoop
+config address_binding dhcp_snoop max_entry ports 1-52 limit no_limit ipv6
+config address_binding nd_snoop ports 1-52 max_entry no_limit
+
+# DoS
+
+config dos_prevention dos_type land_attack action drop state enable
+config dos_prevention dos_type blat_attack action drop state enable
+config dos_prevention dos_type tcp_null_scan action drop state enable
+config dos_prevention dos_type tcp_xmasscan action drop state disable
+config dos_prevention dos_type tcp_synfin action drop state enable
+config dos_prevention dos_type tcp_syn_srcport_less_1024 action drop state enable
+config dos_prevention dos_type ping_death_attack action drop state disable
+config dos_prevention dos_type tcp_tiny_frag_attack action drop state disable
+config dos_prevention trap disable
+config dos_prevention log disable
+
+
+# DhcpServerScreening
+
+config filter dhcp_server ports 1-48 state enable
+config filter dhcp_server illegal_server_log_suppress_duration 5min
+config filter dhcp_server trap_log enable
+
+
+# MAC_ADDRESS_TABLE_NOTIFICATION
+
+enable mac_notification
+config mac_notification interval 300 historysize 128
+config mac_notification ports 1-48 enable
+config mac_notification ports 49-52 disable
+
+# STP
+
+config stp version rstp
+config stp maxage 20 maxhops 20 forwarddelay 15 txholdcount 6 fbpdu disable hellotime 2 nni_bpdu_addr dot1d
+config stp tcn_trap_log both
+config stp priority 32768 instance_id 0
+config stp ports 1-48 externalCost auto  edge auto p2p auto state enable restricted_role false restricted_tcn false
+config stp mst_ports 1-52 instance_id 0 internalCost auto priority 128
+config stp ports 1-48 fbpdu disable
+config stp loop_guard ports 1-52 state disable
+config stp ports 49-52 externalCost auto  edge auto p2p auto state enable restricted_role false restricted_tcn false
+config stp ports 49-52 fbpdu enable
+config stp mst_config_id name MST_ID_0 revision_level 0
+enable stp
+
+
+# SAFEGUARD_ENGINE
+
+config safeguard_engine state enable utilization rising 70 falling 40 trap_log enable mode fuzzy
+
+
+# BANNER_PROMP
+
+config command_prompt {{hostname}}
+config greeting_message default
+
+# TELNETS
+
+enable telnet 23
+
+# SNTP
+
+enable sntp
+config time_zone operator + hour 3 min 0
+config sntp primary 172.22.2.1 secondary 10.35.59.148 poll-interval 720
+config dst annual s_date 29 s_mth 4 s_time 0:0 e_date 12 e_mth 10 e_time 0:0 offset 60
+config dst repeating s_week last s_day sun s_mth 3 s_time 2:0 e_week last e_day sun e_mth 10 e_time 2:0 offset 60
+
+
+# IP
+
+config ipif System ipaddress {{net_details['net_details_ip_prefix']}}
+config ipif System vlan mgmt
+config ipif System dhcpv6_client disable
+config ipif System dhcp_option12 state disable
+disable autoconfig
+config autoconfig timeout 50
+
+# SNMPv3
+
+delete snmp community public
+delete snmp community private
+delete snmp user initial
+delete snmp group initial
+delete snmp view restricted all
+delete snmp view CommunityView all
+config snmp engineID 800000ab0300265a8f0b60
+create snmp view CommunityView 1 view_type included
+create snmp view CommunityView 1.3.6.1.6.3 view_type excluded
+create snmp view CommunityView 1.3.6.1.6.3.1 view_type included
+create snmp group 69gf v1 read_view CommunityView write_view CommunityView notify_view CommunityView
+create snmp group 69gf v2c read_view CommunityView write_view CommunityView notify_view CommunityView
+create snmp group ud62 v1 read_view CommunityView notify_view CommunityView
+create snmp group ud62 v2c read_view CommunityView notify_view CommunityView
+create snmp group apgeud62 v1 read_view CommunityView write_view CommunityView notify_view CommunityView
+create snmp group apgeud62 v2c read_view CommunityView write_view CommunityView notify_view CommunityView
+create snmp group nfrnjrfr v1 read_view CommunityView notify_view CommunityView
+create snmp group nfrnjrfr v2c read_view CommunityView notify_view CommunityView
+create snmp community 69gf view CommunityView read_write
+create snmp community apgeud62 view CommunityView read_write
+create snmp community nfrnjrfr view CommunityView read_only
+create snmp community ud62 view CommunityView read_only
+create snmp host 195.122.226.24 v2c  fg96
+create snmp host 195.122.226.24 v2c  ud62
+disable community_encryption
+
+# ERPS
+
+config erps version g.8032v1
+
+# LLDP
+
+enable lldp
+config lldp message_tx_interval 30
+config lldp tx_delay 2
+config lldp message_tx_hold_multiplier 4
+config lldp reinit_delay 2
+config lldp notification_interval 5
+config lldp forward_message enable
+config lldp ports 1-48 notification disable
+config lldp ports 1-48 admin_status disable
+config lldp ports 49-52 notification enable
+config lldp ports 49-52 admin_status tx_and_rx
+config lldp ports 49-52 basic_tlvs port_description system_name system_description system_capabilities enable
+config lldp ports 49-52 mgt_addr ipv4 {{net_details['net_details_ip']}} enable
+
+
+# ACCESS_AUTHENTICATION_CONTROL
+
+create authen server_host 10.35.59.139 protocol tacacs+ port 49 key "NNOV_TACACS" timeout 5 retransmit 2
+config authen server_group tacacs+ delete server_host 10.35.59.139 protocol tacacs+
+config authen server_group tacacs+ add server_host 10.35.59.139 protocol tacacs+
+config authen_login default method local
+create authen_login method_list_name tac_plus
+config authen_login method_list_name tac_plus method tacacs+ local
+config authen_enable default method  local_enable
+create authen_enable method_list_name tac_plus_ena
+config authen_enable method_list_name tac_plus_ena method tacacs+ local_enable
+config accounting default method  tacacs+ none
+create accounting method_list_name tacacs+
+config accounting method_list_name tacacs+ method tacacs+ none
+config authen application console login default
+config authen application console enable default
+config authen application telnet login method_list_name tac_plus
+config authen application telnet enable method_list_name tac_plus_ena
+config authen application ssh login default
+config authen application ssh enable default
+config authen application http login default
+config authen application http enable default
+config authen parameter response_timeout 0
+config authen parameter attempt 3
+enable authen_policy
+config accounting service network state disable
+config accounting service shell state disable
+config accounting service system state disable
+config accounting service command administrator method_list_name tacacs+
+config accounting service command operator method_list_name tacacs+
+config accounting service command power_user method_list_name tacacs+
+config accounting service command user method_list_name tacacs+
+disable authen_policy_encryption
+
+
+# DHCP_LOCAL_RELAY
+
+enable dhcp_local_relay
+config dhcp_local_relay option_82 remote_id default
+config dhcp_local_relay option_82 circuit_id default
+config dhcp_local_relay option_82 ports 1-52 policy keep
+
+# AAA_LOCAL_ENABLE_PASSWORD
+
+config admin local_enable
+
+qjd9ud62
+qjd9ud62
+
+# DHCP_RELAY
+
+disable dhcp_relay
+config dhcp_relay hops 4 time 0
+config dhcp_relay option_82 state disable
+config dhcp_relay option_82 check disable
+config dhcp_relay option_82 policy replace
+config dhcp_relay option_82 remote_id default
+config dhcp_relay option_82 circuit_id default
+config dhcp_relay option_60 state disable
+config dhcp_relay option_61 state disable
+config dhcp_relay option_82 mac_format case uppercase
+config dhcp_relay option_82 mac_format delimiter number 5
+config dhcp_relay option_82 mac_format delimiter none
+config dhcp_relay option_60 default mode drop
+config dhcp_relay option_61 default drop
+config dhcp_relay ports 1-52 state enable
+
+
+# ARP
+
+config arp_aging time 20
+config gratuitous_arp send ipif_status_up enable
+config gratuitous_arp send dup_ip_detected enable
+config gratuitous_arp learning enable
+
+
+# ROUTE
+
+create iproute default {{net_details['net_details_def_gateway']}} 1 primary

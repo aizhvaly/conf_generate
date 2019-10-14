@@ -1,0 +1,254 @@
+
+# User Account
+create account admin admin
+qjd9ud62
+qjd9ud62
+disable password encryption
+
+
+# Basic
+enable web 80
+disable web
+config command_prompt {{hostname}}
+
+
+# Vlan
+config vlan default delete 1-28
+create vlan mgmt tag {{mgmt_vlan | join(",")}}
+config vlan mgmt add tagged 25-28 advertisement disable
+config vlan mgmt add untagged 24 advertisement disable
+{% for vlan in user_vlan %}
+create vlan user tag {{vlan}}
+config vlan user add tagged 25-28 advertisement disable
+config vlan user add untagged 1-23 advertisement disable
+{% endfor %}
+{% for vlan in other_user_vlans %}
+create vlan {{vlan}} tag {{vlan}}
+config vlan {{vlan}} add tagged 25-28 advertisement disable
+{% endfor %}
+config ipif System vlan mgmt
+
+
+# IP
+config ipif System state enable
+config ipif System ipaddress {{net_details['net_details_ip_with_netmask']}}
+enable jumbo_frame
+
+# Static Route
+create iproute default {{net_details['net_details_def_gateway']}} 1
+
+
+# STP
+enable stp
+config stp version rstp
+config stp priority 32768 instance_id 0
+config stp txholdcount 6 maxage 20 hellotime 2 forwarddelay 15 maxhops 20
+config stp nni_bpdu_addr dot1d
+config stp fbpdu enable
+config stp ports 1-24 externalcost auto edge auto restricted_tcn false restricted_role false p2p auto state disable priority 128 fbpdu disable
+config stp ports 25-28 externalcost auto edge auto restricted_tcn false restricted_role false p2p auto state enable priority 128 fbpdu enable
+config stp mst_config_id name MST_ID_0 revision_level 1
+config stp trap new_root enable
+config stp trap topo_change enable
+
+# traffic segmentation
+config traffic_segmentation 1-24 forward_list 25-28
+config traffic_segmentation 25-28 forward_list 1-28
+
+# LLDP
+enable lldp
+config lldp forward_message enable
+config lldp notification_interval 5
+config lldp ports 24-28 mgt_addr ipv4 enable
+config lldp ports 1-23 admin_status disable
+config lldp ports 1-23 notification disable
+config lldp ports 1-23 basic_tlvs all disable
+config lldp ports 1-28 dot1_tlv_pvid disable
+config lldp ports 1-28 dot1_tlv_vlan_name vlanid 1-4094 disable
+config lldp ports 24-28 admin_status tx_and_rx
+config lldp ports 24-28 notification enable
+config lldp ports 24-28 basic_tlvs port_description system_name system_description system_capabilities enable
+config lldp ports 1-28 dot1_tlv_protocol_identity eapol disable
+config lldp ports 1-28 dot1_tlv_protocol_identity lacp disable
+config lldp ports 1-28 dot1_tlv_protocol_identity gvrp disable
+config lldp ports 1-28 dot1_tlv_protocol_identity stp disable
+config lldp ports 1-28 dot3_tlvs all disable
+
+
+# ACL
+enable cpu_interface_filtering
+
+# SNMP
+enable snmp
+delete snmp community public
+delete snmp community private
+delete snmp user ReadWrite v1
+delete snmp user ReadWrite v2
+delete snmp user ReadOnly v1
+delete snmp user ReadOnly v2
+delete snmp group ReadWrite
+delete snmp group ReadOnly
+delete snmp view ReadWrite 1
+disable community_encryption
+create snmp user ReadOnly ReadOnly v1
+create snmp user ReadOnly ReadOnly v2c
+create snmp user ReadWrite ReadWrite v1
+create snmp user ReadWrite ReadWrite v2c
+create snmp group ud62 v1 read_view CommunityView notify_view CommunityView
+create snmp group ud62 v2c read_view CommunityView notify_view CommunityView
+create snmp group ReadOnly v1 read_view ReadWrite notify_view ReadWrite
+create snmp group ReadOnly v2c read_view ReadWrite notify_view ReadWrite
+create snmp group apgeud62 v1 read_view CommunityView write_view CommunityView notify_view CommunityView
+create snmp group apgeud62 v2c read_view CommunityView write_view CommunityView notify_view CommunityView
+create snmp group nfrnjrfr v1 read_view CommunityView notify_view CommunityView
+create snmp group nfrnjrfr v2c read_view CommunityView notify_view CommunityView
+create snmp group ReadWrite v1 read_view ReadWrite write_view ReadWrite notify_view ReadWrite
+create snmp group ReadWrite v2c read_view ReadWrite write_view ReadWrite notify_view ReadWrite
+create snmp view ReadWrite 1 1 view_type included
+create snmp community 69gf ReadWrite
+create snmp community ud62 ReadOnly
+create snmp community nfrnjrfr ReadOnly
+create snmp host 195.122.226.24 v2c ud62
+config snmp engineID 4445532d313231302d3238000102030405
+enable snmp authenticate_traps
+config snmp coldstart_traps enable
+config snmp warmstart_traps enable
+enable snmp linkchange_traps
+config snmp linkchange_traps ports 1-28 enable
+disable snmp Login_Logout traps
+enable snmp rstpport_state_change traps
+enable snmp firmware_upgrade_state traps
+enable snmp port_security_violation traps
+enable snmp IMPB_violation traps
+enable snmp LBD traps
+enable snmp DHCP_screening traps
+enable snmp duplicate_IP_detected traps
+disable snmp DHCPv6_screening traps
+disable snmp ICMPv6_RA_all_node traps
+disable snmp DULD traps
+
+
+# MAC address table notification
+enable mac_notification
+config mac_notification interval 1
+config mac_notification historysize 1
+config mac_notification ports 1-24 enable
+config mac_notification ports 25-28 disable
+
+
+# SNTP
+config sntp primary 172.22.2.1 secondary 10.35.59.142 poll-interval 86400
+enable sntp
+config time_zone operator + hour 3 minute 0
+config dst annual s_mth 4 s_date 29 s_time 00:00 e_mth 10 e_date 12 e_time 00:00 offset 60
+config dst repeat s_mth 4 s_week 1 s_day sun s_time 00:00 e_mth 10 e_week last e_day sun e_time 00:00 offset 60
+config dst disable
+
+# DHCP_RELAY
+config dhcp_relay vlan vlanid {{other_user_vlans | join(",")}} state enable
+config dhcp_relay option_82 state enable
+config dhcp_relay option_82 check disable
+config dhcp_relay option_82 policy replace
+config dhcp_relay option_82 remote_id default
+config dhcp_relay option_82 circuit_id default
+enable dhcp_local_relay
+config dhcp_local_relay vlan vlanid {{user_vlan | join(",")}} state enable
+config dhcp_local_relay port 1-23 state enable
+
+
+
+# Loopback Detection
+enable loopdetect
+config loopdetect mode portbase
+config loopdetect interval_time 2
+config loopdetect lbd_recover_time 180
+config loopdetect ports 1-24 state enable
+
+
+
+# traffic control
+config traffic control 1-24 broadcast enable multicast enable unicast disable action drop threshold 64 time_interval 5
+
+# access authentication control
+enable authen_policy
+disable aaa_server_password_encryption
+config authen parameter response_timeout 0
+config authen parameter attempt 5
+create authen server_host 10.35.59.139 protocol tacacs+ port 49 key NNOV_TACACS timeout 5
+create authen server_group tacacs+
+config authen server_group tacacs+ add server_host 10.35.59.139 protocol tacacs+
+create authen_login method_list_name default
+config authen_login default method tacacs+ local
+create authen_login method_list_name tacacs+
+config authen_login method_list_name tacacs+ method tacacs+ local
+create authen_enable method_list_name default
+create authen_enable method_list_name tacacs+
+config authen_enable method_list_name tacacs+ method tacacs+ none
+create authen_enable method_list_name local_enable
+config authen_enable method_list_name local_enable method tacacs+ none
+config authen application console login method_list_name default
+config authen application telnet login method_list_name tacacs+
+config authen application ssh login method_list_name tacacs+
+config authen application http login method_list_name tacacs+
+config authen application console enable method_list_name default
+config authen application telnet enable method_list_name default
+config authen application ssh enable method_list_name default
+config authen application http enable method_list_name default
+config admin local_enable qjd9ud62
+
+
+# Ethernet OAM
+config ethernet_oam ports 1-28 state disable mode active remote_loopback stop received_remote_loopback ignore
+config ethernet_oam ports 1-28 critical_link_event dying_gasp notify_state enable
+config ethernet_oam ports 1-28 critical_link_event critical_event notify_state enable
+config ethernet_oam ports 1-28 link_monitor error_symbol threshold 1 window 1000 notify_state enable
+config ethernet_oam ports 1-28 link_monitor error_frame threshold 1 window 1000 notify_state enable
+config ethernet_oam ports 1-28 link_monitor error_frame_seconds threshold 1 window 60000 notify_state enable
+config ethernet_oam ports 1-24 link_monitor error_frame_period threshold 1 window 148810 notify_state enable
+config ethernet_oam ports 25-28 link_monitor error_frame_period threshold 1 window 1488100 notify_state enable
+
+# port security
+config port_security 1-24 admin_state enable max_learning_addr 5 lock_address_mode DeleteOnTimeout
+config port_security 25-28 admin_state disable max_learning_addr 0 lock_address_mode DeleteOnTimeout
+
+# port
+config ports 1-24 speed auto state enable flow_control disable mdix auto learning enable clear description
+config ports 25 medium_type copper speed auto state enable flow_control disable mdix auto learning enable clear description
+config ports 25 medium_type fiber speed auto state enable flow_control disable learning enable clear description
+config ports 26 medium_type copper speed auto state enable flow_control disable mdix auto learning enable clear description
+config ports 26 medium_type fiber speed auto state enable flow_control disable learning enable clear description
+config ports 27 speed auto state enable flow_control disable learning enable clear description
+config ports 28 speed auto state enable flow_control disable learning enable clear description
+config ports 1-24 capability_advertised 10_half 10_full 100_half 100_full
+config ports 25-28 capability_advertised 10_half 10_full 100_half 100_full 1000_full
+
+
+# DDM
+config ddm power_unit mw
+config ddm ports 25-28 state disable
+config ddm ports 25-28 shutdown none
+config ddm ports 25-28 temperature_threshold high_alarm +0.000 low_alarm +0.000 high_warning +0.000 low_warning -20.000
+config ddm ports 25-28 voltage_threshold high_alarm 0.00 low_alarm 0.00 high_warning 0.00 low_warning 2.90
+config ddm ports 25-28 bias_current_threshold high_alarm 0.0 low_alarm 0.0 high_warning 0.0 low_warning 1.0
+config ddm ports 25-28 tx_power_threshold high_alarm 0.0000 low_alarm 0.0000 high_warning 0.0000 low_warning 0.2000
+config ddm ports 25-28 rx_power_threshold high_alarm 0.0000 low_alarm 0.0000 high_warning 0.0000 low_warning 0.0126
+
+
+# Flood FDB
+enable flood_fdb
+config flood_fdb log enable trap enable
+
+
+# Accounting
+create accounting method_list_name default
+config accounting default method tacacs+ none
+create accounting method_list_name tacacs+
+config accounting method_list_name tacacs+ method tacacs+ none
+config accounting service network state disable
+config accounting service shell state disable
+config accounting service system state disable
+config accounting service command administrator method_list_name tacacs+
+config accounting service command operator method_list_name tacacs+
+config accounting service command power_user method_list_name tacacs+
+config accounting service command user method_list_name tacacs+
+
