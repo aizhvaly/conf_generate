@@ -1,0 +1,16 @@
+version: '3'
+services:
+  app:
+    build: app/.
+    ports:
+      - "8000:8000"
+    container_name: app
+  webapp:
+    image: "nginx:1.17.1"
+    volumes: 
+      - /Users/a.zhvaluk/Documents/conf_generate/conf/:/etc/nginx/conf.d/
+    links: 
+      - app
+    ports:
+      - "80:80"
+    container_name: webapp
