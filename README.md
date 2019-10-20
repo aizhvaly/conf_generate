@@ -1,4 +1,4 @@
-# For run it:  
+### For run it:  
 sudo mkdir -p /app/static  
 sudo mkdir -p /app/storage  
 mv conf/webapp/conf /etc/nginx/conf.d/webapp.conf  
