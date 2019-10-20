@@ -1,4 +1,4 @@
-For run it: \n
+For run it: <пробел><пробел>
 sudo mkdir -p /app/static
 sudo mkdir -p /app/storage
 mv conf/webapp/conf /etc/nginx/conf.d/webapp.conf
